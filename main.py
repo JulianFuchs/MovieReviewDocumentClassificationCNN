@@ -79,10 +79,11 @@ class Main:
 
             labels = np.concatenate((pos_labels, neg_labels), axis=0)
 
+            # set dropout_keep_prob to 1 when evaluating
             if step % 5 == 0 and self._options._verbose_mode: #True: #
                 acc = self._sess.run(self._cnn_model._accuracy, {self._cnn_model.input_x: batch,
                                                                  self._cnn_model.input_y: labels,
-                                                                 self._cnn_model.dropout_keep_prob : 0.5})
+                                                                 self._cnn_model.dropout_keep_prob : 1})
 
                 percentage = (step * half_batch_size) / (1000 - self._validation_test_set_size)
 
@@ -127,6 +128,12 @@ class Main:
 
             batch = self._data_generator.generate_batch(index, half_batch_size)
 
+            for x in range(0, self._options._batch_size):
+                for y in range(0, 113):
+                    for z in range(0, 180):
+                        if batch[x][y][z] < 0:
+                            print('neg value at: [' + str(x) + ', ' + str(y) + ', ' + str(z) + ']')
+
             pos_labels = np.zeros(shape=(half_batch_size, 2), dtype=float)
 
             for i in range(0, half_batch_size):
@@ -139,9 +146,10 @@ class Main:
 
             labels = np.concatenate((pos_labels, neg_labels), axis=0)
 
+            # set dropout_keep_prob to 1 when evaluating
             acc = self._sess.run(self._cnn_model._accuracy, {self._cnn_model.input_x: batch,
                                                              self._cnn_model.input_y: labels,
-                                                             self._cnn_model.dropout_keep_prob: 0.5})
+                                                             self._cnn_model.dropout_keep_prob: 1})
 
             accuracies.append(acc)
 

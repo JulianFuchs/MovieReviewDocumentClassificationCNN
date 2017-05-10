@@ -25,7 +25,6 @@ class CNN():
 
         num_classes = 2
 
-        l2_reg_lambda = 0.0
 
         # Placeholders for input, output and dropout
         # input is [None, max_document_length, max_sentence_length]
@@ -64,6 +63,8 @@ class CNN():
 
         sentence_representations = []
 
+        sentence_losses = []
+
         # iterate over all sentences, apply sentence CNN on each sentence
         for d in range(0, max_document_length):
 
@@ -85,8 +86,9 @@ class CNN():
                     strides=[1, 1, 1, 1],
                     padding="VALID",
                     name="conv")
+                # conv has shape: [None, max_sentence_length - filter_size + 1, 1, num_filters]
 
-                # Apply nonlinearity
+                # Add filter bias, apply non-linearity
                 non_lin_vec = tf.nn.relu(tf.nn.bias_add(conv, filter_biases[i]), name="relu")
                 # non_lin_vec has shape: [None, max_sentence_length - filter_size + 1, 1, num_filters]
 
@@ -108,19 +110,23 @@ class CNN():
             combined_pools = tf.reshape(combined_pools, [-1, num_filters_total])
             # combined pools has shape: [None, num_filters_total]
 
+            sentence_representations.append(combined_pools)
+
             if sentence_rep_size != num_filters_total:
                 print('sentence_rep_size != num_filters_total')
 
-            # Add dropout
-            combined_pools_dropout = tf.nn.dropout(combined_pools, self.dropout_keep_prob)
-            # combined pools has shape: [None, sentence_rep_size==num_filters_total]
+            # target replication via sentence loss
+            W = tf.Variable(tf.truncated_normal([sentence_rep_size, num_classes], stddev=0.1), name="W")
+            b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
 
-            '''the combined_pools_dropout has a length of 150 = sentence representation with 3 filter sizes, 
-            and 50 filters per size. So we're finished with applying the CNN to all sentences in the document'''
-            # todo: use combined_pools_dropout or combined_pools ?
-            sentence_representations.append(combined_pools)
+            scores = tf.nn.xw_plus_b(combined_pools, W, b)
 
+            losses = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=self.input_y)
+            # losses has shape: [None, ]
 
+            avg_sentence_loss_over_batch = tf.reduce_mean(losses)
+
+            sentence_losses.append(avg_sentence_loss_over_batch)
 
         doc = tf.stack(sentence_representations, axis=1)
         # doc has shape: [None, max_document_length, sentence_rep_size]
@@ -129,7 +135,7 @@ class CNN():
 
 
         # ============================= Document CNN =============================
-        # 50 filters of size 3 todo
+        # 50 filters of size document_filter_size
 
         # Convolution Layer
         filter_shape = [document_filter_size, sentence_rep_size, 1, num_filters]
@@ -162,22 +168,27 @@ class CNN():
             print('document_rep_size != num_filters')
 
         pooled = tf.reshape(pooled, [-1, document_rep_size])
-        # combined pools has shape: [None, document_rep_size]
+        # pooled has shape: [None, document_rep_size]
+
+        # Add dropout
+        pooled = tf.nn.dropout(pooled, self.dropout_keep_prob)
 
         W = tf.Variable(tf.truncated_normal([document_rep_size, num_classes], stddev=0.1), name="W")
         b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
 
         scores = tf.nn.xw_plus_b(pooled, W, b)
         # scores has shape: [None, num_classes]
-
         predictions = tf.argmax(scores, axis=1, name="predictions")
-        # predictions has shape: [None, ????]
-        print(predictions.get_shape())
+        # predictions has shape: [None, ]. A shape of [x, ] means a vector of size x
 
         # todo: add sentence losses to loss
         losses = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=self.input_y)
+        # losses has shape: [None, ]
 
-        self.loss = tf.reduce_mean(losses)
+        avg_loss = tf.reduce_mean(losses)
+
+        # include target replication, i.e., sentence_losses:
+        self.loss = avg_loss + options._lambda_regularizer_strength/len(sentence_losses) * sum(sentence_losses)
 
         # my optimizer + optimize function
         optimizer = tf.train.AdamOptimizer()
@@ -185,10 +196,9 @@ class CNN():
 
         correct_predictions = tf.equal(predictions, tf.argmax(self.input_y, 1))
         self._accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
-        print(self._accuracy.get_shape())
 
 if __name__ == '__main__':
-    print('model cnn generation test')
+    print('building tensor flow model cnn test')
 
     options = Options.Options()
 

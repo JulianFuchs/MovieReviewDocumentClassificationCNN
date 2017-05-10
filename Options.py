@@ -2,14 +2,16 @@ import os
 import sys
 
 class Options:
-    def __init__(self, voc_size=10000,
+    def __init__(self,
+                 voc_size=10000,
                  max_document_length=113,
                  max_sentence_length=180,
+                 lambda_regularizer_strength=1000,
                  data_folder_path='/home/theearlymiddleages/Datasets/MovieDocumentSentimentClassification/',
                  number_of_threads=8,
                  epochs=3,
-                 batch_size = 10,#10,
-                 verbose_mode=False
+                 batch_size=10,#10,
+                 verbose_mode=True
                  ):
 
         self._number_of_threads = number_of_threads
@@ -17,10 +19,11 @@ class Options:
         self._batch_size = batch_size
         self._verbose_mode = verbose_mode
 
-
         self._voc_size = voc_size
         self._max_document_length = max_document_length
         self._max_sentence_length = max_sentence_length
+        self._lambda_regularizer_strength = lambda_regularizer_strength
+
         self._data_folder_path = data_folder_path
 
         pos_path = data_folder_path + 'pos/'

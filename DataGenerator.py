@@ -61,7 +61,8 @@ class DataGenerator():
     The output is: [batch_size, _max_document_length, _max_sentence_length]'''
     def generate_batch(self, start_ind, half_batch_size):
 
-        batch = np.ndarray(shape=(2*half_batch_size,
+        # when we use np.zeros, we have padding values everywhere (since _int_for_padding == 0) and fill in the rest
+        batch = np.zeros(shape=(2*half_batch_size,
                                   self._options._max_document_length,
                                   self._options._max_sentence_length),
                                     dtype=float)  # Creates a 3D array with uninitialized values
@@ -87,22 +88,6 @@ class DataGenerator():
                         else:
                             # insert unknown token
                             batch[batch_it][s_i][w_i] = self._int_for_unknown
-
-                w_i += 1
-
-                while w_i < self._options._max_sentence_length:
-                    batch[batch_it][s_i][w_i] = self._int_for_padding
-                    w_i += 1
-
-            s_i += 1
-
-            while s_i < self._options._max_document_length:
-
-                for w_i in range(0, self._options._max_sentence_length):
-
-                    batch[batch_it][s_i][w_i] = self._int_for_padding
-
-                s_i += 1
 
             batch_it += 1
 
