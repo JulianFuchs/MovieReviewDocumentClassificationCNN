@@ -34,7 +34,9 @@ class Main:
 
         start = time.time()
 
+        print('Sanity test, running model without training on validation set:')
         self.evaluate_on_validation()
+        print('')
 
         for e in range(0, options._epochs):
             print('Starting epoch ' + str(e + 1))
@@ -54,40 +56,29 @@ class Main:
         print('Training model on training set...')
 
         start_epoch = time.time()
-        # take batch_size/2 positive examples
 
-        index = self._valid_set_offset + self._validation_test_set_size
+        self._data_generator.randomize_training_sets()
+
+        index = 0
         half_batch_size = math.floor(self._options._batch_size / 2)
 
         # todo: actually include the final data points as well
         step = 0
         optimize_time_sum = 0
 
-        while index + half_batch_size < 1000:
+        while index + half_batch_size <= self._options._number_of_files_per_class:
 
-            batch = self._data_generator.generate_batch(index, half_batch_size)
-
-            pos_labels = np.zeros(shape=(half_batch_size, 2), dtype=float)
-
-            for i in range(0, half_batch_size):
-                pos_labels[i, 1] = 1
-
-            neg_labels = np.zeros(shape=(half_batch_size, 2), dtype=float)
-
-            for i in range(0, half_batch_size):
-                neg_labels[i, 0] = 1
-
-            labels = np.concatenate((pos_labels, neg_labels), axis=0)
+            batch, labels = self._data_generator.generate_training_batch(index, half_batch_size)
 
             # set dropout_keep_prob to 1 when evaluating
-            if step % 5 == 0 and self._options._verbose_mode: #True: #
+            if step % 50 == 0 and self._options._verbose_mode: #True: #
                 acc = self._sess.run(self._cnn_model._accuracy, {self._cnn_model.input_x: batch,
                                                                  self._cnn_model.input_y: labels,
                                                                  self._cnn_model.dropout_keep_prob : 1})
 
                 percentage = (step * half_batch_size) / (1000 - self._validation_test_set_size)
 
-                print('Accuracy after ' + str(math.floor(percentage * 100)) + '%: '  + str(acc))
+                print('Accuracy after ' + str(math.floor(percentage * 100)) + '%: ' + str(acc))
                 # if step > 0:
                 #     print('On average, an optimize call took: ' + str(optimize_time_sum / step) + ' seconds')
 
@@ -122,29 +113,17 @@ class Main:
         accuracies = []
 
         step = 0
-        index = self._valid_set_offset
+        index = 0
 
-        while index < self._valid_set_offset + self._validation_test_set_size:
+        while index + half_batch_size <= self._validation_test_set_size/2:
 
-            batch = self._data_generator.generate_batch(index, half_batch_size)
+            batch, labels = self._data_generator.generate_validation_batch(index, half_batch_size)
 
             for x in range(0, self._options._batch_size):
-                for y in range(0, 113):
-                    for z in range(0, 180):
+                for y in range(0, self._options._max_document_length):
+                    for z in range(0, self._options._max_sentence_length):
                         if batch[x][y][z] < 0:
                             print('neg value at: [' + str(x) + ', ' + str(y) + ', ' + str(z) + ']')
-
-            pos_labels = np.zeros(shape=(half_batch_size, 2), dtype=float)
-
-            for i in range(0, half_batch_size):
-                pos_labels[i, 1] = 1
-
-            neg_labels = np.zeros(shape=(half_batch_size, 2), dtype=float)
-
-            for i in range(0, half_batch_size):
-                neg_labels[i, 0] = 1
-
-            labels = np.concatenate((pos_labels, neg_labels), axis=0)
 
             # set dropout_keep_prob to 1 when evaluating
             acc = self._sess.run(self._cnn_model._accuracy, {self._cnn_model.input_x: batch,
@@ -153,7 +132,7 @@ class Main:
 
             accuracies.append(acc)
 
-            if step % 5 == 0 and self._options._verbose_mode:  # True: #
+            if step % 50 == 0 and self._options._verbose_mode:  # True: #
                 percentage = (step * half_batch_size) / self._validation_test_set_size
                 print('Accuracy after ' + str(math.floor(percentage*100)) + '%: ' + str(acc))
 

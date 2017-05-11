@@ -61,6 +61,9 @@ class CNN():
             filter_matrices.append(filter_matrix)
             filter_biases.append(filter_bias)
 
+        sentence_score_matrix = tf.Variable(tf.truncated_normal([sentence_rep_size, num_classes], stddev=0.1), name="W")
+        sentence_score_bias = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
+
         sentence_representations = []
 
         sentence_losses = []
@@ -116,10 +119,7 @@ class CNN():
                 print('sentence_rep_size != num_filters_total')
 
             # target replication via sentence loss
-            W = tf.Variable(tf.truncated_normal([sentence_rep_size, num_classes], stddev=0.1), name="W")
-            b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
-
-            scores = tf.nn.xw_plus_b(combined_pools, W, b)
+            scores = tf.nn.xw_plus_b(combined_pools, sentence_score_matrix, sentence_score_bias)
 
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=self.input_y)
             # losses has shape: [None, ]
