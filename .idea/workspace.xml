@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4fe10c88-d434-4709-be94-3b03189596bd" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CNNModel.py" afterPath="$PROJECT_DIR$/CNNModel.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DataGenerator.py" afterPath="$PROJECT_DIR$/DataGenerator.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Options.py" afterPath="$PROJECT_DIR$/Options.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-    </list>
+    <list default="true" id="4fe10c88-d434-4709-be94-3b03189596bd" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
