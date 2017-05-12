@@ -181,18 +181,17 @@ class CNN():
         predictions = tf.argmax(scores, axis=1, name="predictions")
         # predictions has shape: [None, ]. A shape of [x, ] means a vector of size x
 
-        # todo: add sentence losses to loss
         losses = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=self.input_y)
         # losses has shape: [None, ]
 
         avg_loss = tf.reduce_mean(losses)
 
         # include target replication, i.e., sentence_losses:
-        self.loss = avg_loss + options._lambda_regularizer_strength/len(sentence_losses) * sum(sentence_losses)
+        self._loss = avg_loss + options._lambda_regularizer_strength/len(sentence_losses) * sum(sentence_losses)
 
         # my optimizer + optimize function
         optimizer = tf.train.AdamOptimizer()
-        self._optimize = optimizer.minimize(self.loss)
+        self._optimize = optimizer.minimize(self._loss)
 
         correct_predictions = tf.equal(predictions, tf.argmax(self.input_y, 1))
         self._accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")

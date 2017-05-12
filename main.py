@@ -66,9 +66,14 @@ class Main:
         step = 0
         optimize_time_sum = 0
 
-        while index + half_batch_size <= self._options._number_of_files_per_class:
+        losses = []
+
+        while index + half_batch_size <= len(self._data_generator._training_set_pos):
 
             batch, labels = self._data_generator.generate_training_batch(index, half_batch_size)
+
+            if len(batch) == 0 or len(labels) == 0:
+                print('batch or labels is empty')
 
             # set dropout_keep_prob to 1 when evaluating
             if step % 50 == 0 and self._options._verbose_mode: #True: #
@@ -86,6 +91,14 @@ class Main:
             input_x: [batch_size, char_voc, max_seq, 1]
             input_y: [batch_size, classes]
             '''
+
+            loss = self._sess.run(self._cnn_model._loss, {self._cnn_model.input_x: batch,
+                                                       self._cnn_model.input_y: labels,
+                                                       self._cnn_model.dropout_keep_prob: 0.5})
+
+            losses.append(loss)
+            #print(loss)
+
             start_optimize = time.time()
             self._sess.run(self._cnn_model._optimize, {self._cnn_model.input_x: batch,
                                                        self._cnn_model.input_y: labels,
@@ -101,7 +114,9 @@ class Main:
         end_epoch = time.time()
         print('Finished training one epoch')
         print('Training took ' + str((end_epoch - start_epoch) / 60) + ' minutes')
-        print('On average, an optimize call took: ' + str(optimize_time_sum/step) + ' seconds\n')
+        print('On average, an optimize call took: ' + str(optimize_time_sum/step) + ' seconds')
+        print('Average loss: ' + str(sum(losses)/len(losses)))
+        print('')
 
     def evaluate_on_validation(self):
 
@@ -119,11 +134,11 @@ class Main:
 
             batch, labels = self._data_generator.generate_validation_batch(index, half_batch_size)
 
-            for x in range(0, self._options._batch_size):
-                for y in range(0, self._options._max_document_length):
-                    for z in range(0, self._options._max_sentence_length):
-                        if batch[x][y][z] < 0:
-                            print('neg value at: [' + str(x) + ', ' + str(y) + ', ' + str(z) + ']')
+            # for x in range(0, self._options._batch_size):
+            #     for y in range(0, self._options._max_document_length):
+            #         for z in range(0, self._options._max_sentence_length):
+            #             if batch[x][y][z] < 0:
+            #                 print('neg value at: [' + str(x) + ', ' + str(y) + ', ' + str(z) + ']')
 
             # set dropout_keep_prob to 1 when evaluating
             acc = self._sess.run(self._cnn_model._accuracy, {self._cnn_model.input_x: batch,
@@ -181,16 +196,17 @@ if __name__ == '__main__':
                               validation_test_set_size=validation_test_set_size,
                               verbose_mode=verbose_mode)
 
-    # print(voc_size)
-    # print(max_document_length)
-    # print(max_sentence_length)
-    # print(lambda_regularizer_strength)
-    # print(data_folder_path)
-    # print(number_of_threads)
-    # print(epochs)
-    # print(batch_size)
-    # print(validation_test_set_size)
-    # print(verbose_mode)
+    print('Options are: ')
+    print(voc_size)
+    print(max_document_length)
+    print(max_sentence_length)
+    print(lambda_regularizer_strength)
+    print(data_folder_path)
+    print(number_of_threads)
+    print(epochs)
+    print(batch_size)
+    print(validation_test_set_size)
+    print(verbose_mode)
 
     Main(options)
 

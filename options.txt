@@ -1,10 +1,10 @@
 10000
 113
 180
-0
+100
 /home/theearlymiddleages/Datasets/MovieDocumentSentimentClassification/
 8
-10
+20
 10
 200
 0
