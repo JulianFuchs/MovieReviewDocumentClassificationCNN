@@ -144,10 +144,10 @@ class DataGenerator():
                     batch[batch_it][s_i][w_i] = self._int_for_padding
                 s_i += 1
 
-            # for y in range(0, self._options._max_document_length):
-            #     for z in range(0, self._options._max_sentence_length):
-            #         if batch[batch_it][y][z] < 0:
-            #             print('neg value at: [' + str(batch_it) + ', ' + str(y) + ', ' + str(z) + ']')
+            for y in range(0, self._options._max_document_length):
+                for z in range(0, self._options._max_sentence_length):
+                    if batch[batch_it][y][z] < 0:
+                        print('neg value at: [' + str(batch_it) + ', ' + str(y) + ', ' + str(z) + ']')
 
             batch_it += 1
 
@@ -223,3 +223,6 @@ if __name__ == '__main__':
     data_generator = DataGenerator(options)
 
     batch = data_generator.generate_validation_batch(0, 10)
+
+
+

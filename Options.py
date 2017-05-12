@@ -6,7 +6,7 @@ class Options:
                  voc_size=10000,#5000,#
                  max_document_length=113,#60,#
                  max_sentence_length=180,#90,#
-                 lambda_regularizer_strength=5, #1000,
+                 lambda_regularizer_strength=5,#1000,
                  data_folder_path='/home/theearlymiddleages/Datasets/MovieDocumentSentimentClassification/',
                  number_of_threads=8,
                  epochs=10,

@@ -22,7 +22,7 @@ class Main:
         self._valid_set_offset = 0
         self._validation_test_set_size = 100
 
-        self._cnn_model = CNNModel.CNN(options)
+        self._cnn_model = CNNModel.CNN(options)#LinearModel.LinearModel(options)#
 
         config = tf.ConfigProto(intra_op_parallelism_threads=options._number_of_threads,
                                 inter_op_parallelism_threads=options._number_of_threads)
@@ -148,14 +148,51 @@ class Main:
 
 if __name__ == '__main__':
 
-    options = Options.Options()
+    # reading options file
+    curr_path = os.path.dirname(os.path.realpath(__file__))
+
+    option_loc = curr_path + '/options.txt'
+
+    options_file = open(option_loc + '', 'r').read()
+
+    options_lines = options_file.split('\n')
+
+
+    voc_size = int(options_lines[0])
+    max_document_length = int(options_lines[1])
+    max_sentence_length = int(options_lines[2])
+    lambda_regularizer_strength = int(options_lines[3])
+    data_folder_path = options_lines[4]
+    number_of_threads = int(options_lines[5])
+    epochs = int(options_lines[6])
+    batch_size = int(options_lines[7])
+    validation_test_set_size = int(options_lines[8])
+    verbose_mode = int(options_lines[9])
+
+
+    options = Options.Options(voc_size=voc_size,
+                              max_document_length=max_document_length,
+                              max_sentence_length=max_sentence_length,
+                              lambda_regularizer_strength=lambda_regularizer_strength,
+                              data_folder_path=data_folder_path,
+                              number_of_threads=number_of_threads,
+                              epochs=epochs,
+                              batch_size=batch_size,
+                              validation_test_set_size=validation_test_set_size,
+                              verbose_mode=verbose_mode)
+
+    # print(voc_size)
+    # print(max_document_length)
+    # print(max_sentence_length)
+    # print(lambda_regularizer_strength)
+    # print(data_folder_path)
+    # print(number_of_threads)
+    # print(epochs)
+    # print(batch_size)
+    # print(validation_test_set_size)
+    # print(verbose_mode)
 
     Main(options)
 
-    # if len(sys.argv) != 5:
-    #     print('To run model, input: pos_path, neg_path, epochs, num_threads')
-    # else:
-    #     print('Starting Tweet Sentiment char based CNN analysis \n')
-    #     Main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
 
