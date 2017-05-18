@@ -161,17 +161,11 @@ class Main:
         print('Accuracy over entire validation set: ' + str(math.floor(100*total_accuracy)) + '%')
 
 
-if __name__ == '__main__':
 
-    # reading options file
-    curr_path = os.path.dirname(os.path.realpath(__file__))
-
-    option_loc = curr_path + '/options.txt'
-
-    options_file = open(option_loc + '', 'r').read()
+def load_options(options_path):
+    options_file = open(options_path, 'r').read()
 
     options_lines = options_file.split('\n')
-
 
     voc_size = int(options_lines[0])
     max_document_length = int(options_lines[1])
@@ -184,7 +178,6 @@ if __name__ == '__main__':
     validation_test_set_size = int(options_lines[8])
     verbose_mode = int(options_lines[9])
 
-
     options = Options.Options(voc_size=voc_size,
                               max_document_length=max_document_length,
                               max_sentence_length=max_sentence_length,
@@ -196,19 +189,43 @@ if __name__ == '__main__':
                               validation_test_set_size=validation_test_set_size,
                               verbose_mode=verbose_mode)
 
-    print('Options are: ')
-    print(voc_size)
-    print(max_document_length)
-    print(max_sentence_length)
-    print(lambda_regularizer_strength)
-    print(data_folder_path)
-    print(number_of_threads)
-    print(epochs)
-    print(batch_size)
-    print(validation_test_set_size)
-    print(verbose_mode)
+    return options
 
-    Main(options)
+
+if __name__ == '__main__':
+
+    # reading options file
+    curr_path = os.path.dirname(os.path.realpath(__file__))
+
+    original_stdout = sys.stdout
+
+    if not os.path.exists(curr_path + '/outputs'):
+        os.makedirs(curr_path + '/outputs')
+
+    for options_file_name in os.listdir(curr_path + '/options/'):
+        print('Running options file: ' + str(options_file_name))
+        options = load_options(str(curr_path) + '/options/' + str(options_file_name))
+        output_file = open(curr_path + '/outputs/' + str(options_file_name), 'w')
+        sys.stdout = output_file
+
+        Main(options)
+
+        sys.stdout = original_stdout
+
+    # print('Options are: ')
+    # print(voc_size)
+    # print(max_document_length)
+    # print(max_sentence_length)
+    # print(lambda_regularizer_strength)
+    # print(data_folder_path)
+    # print(number_of_threads)
+    # print(epochs)
+    # print(batch_size)
+    # print(validation_test_set_size)
+    # print(verbose_mode)
+    # print()
+    #
+    # Main(options)
 
 
 

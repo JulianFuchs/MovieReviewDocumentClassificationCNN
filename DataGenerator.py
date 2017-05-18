@@ -38,6 +38,9 @@ class DataGenerator():
         for i in range(0, options._voc_size - 2):
             self._vocabulary[sorted_voc_count_dict[i][0]] = i + 2
             vocabulary_word_coverage += sorted_voc_count_dict[i][1]
+            # print(sorted_voc_count_dict[i][0])
+            # print(sorted_voc_count_dict[i][1])
+
 
         print('With a vocabulary size of ' + str(options._voc_size) + ', ' +
               str(math.floor(vocabulary_word_coverage/self._total_words_count*100)) + '% of all words are covered')
